@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-void apply_red_filter(BYTE* pixel_data, BYTE* previous_pixel_data, int width, int height, int pitch, BYTE* overflow_data, int go) {
+void apply_filter(BYTE* pixel_data, BYTE* previous_pixel_data, int width, int height, int pitch, BYTE* overflow_data, int go) {
     // Set changes in RGP value for pixels when value of data is 1
     int addred = 4;
     int addblue = 4;
@@ -15,7 +15,7 @@ void apply_red_filter(BYTE* pixel_data, BYTE* previous_pixel_data, int width, in
     int addgreen2 = -4;
 
     // Set height and width of pixels which will generate signals
-    int pixelHeight = height-100;
+    int pixelHeight = 200;
     int pixelWidth = 10;
 
     for (int y = 100; y < pixelHeight; y++) {
@@ -135,7 +135,7 @@ void update_screen(HDC hdc, HDC hMemDC, HBITMAP hBitmap, BYTE* pixel_data, BYTE*
     GetDIBits(hMemDC, hBitmap, 0, height, pixel_data, bmpInfo, DIB_RGB_COLORS);
 
     // Apply red filter conditionally
-    apply_red_filter(pixel_data, previous_pixel_data, width, height, width * 4, overflow_data, go);
+    apply_filter(pixel_data, previous_pixel_data, width, height, width * 4, overflow_data, go);
 
     // Apply modified bitmap to the screen
     SetDIBits(hMemDC, hBitmap, 0, height, pixel_data, bmpInfo, DIB_RGB_COLORS);
