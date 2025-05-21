@@ -8,10 +8,9 @@
 bool filter_applied = false;
 
 void apply_filter(BYTE* pixel_data, BYTE* previous_pixel_data, int width, int height, int pitch, BYTE* overflow_data, int go) {
-    // Changable constants
-    int addred = 3, addgreen = 3, addblue = 3;
-    int addred2 = -3,addgreen2 = -3, addblue2 = -3;
-    
+    int addred = 2, addgreen = 2, addblue = 2;
+    int addred2 = -2,addgreen2 = -2, addblue2 = -2;
+
     int pixelHeight = height;
     int pixelWidth = width;
 
@@ -21,6 +20,7 @@ void apply_filter(BYTE* pixel_data, BYTE* previous_pixel_data, int width, int he
     if (go == 1 && !filter_applied) {
         filter_applied = true;
         // Apply filter
+
         for (int y = fromY; y < pixelHeight; y++) {
             for (int x = fromX; x < pixelWidth; x++) {
                 int offset = y * pitch + x * 4;
@@ -135,7 +135,6 @@ int main() {
     bmpInfo.bmiHeader.biBitCount = 32;
     bmpInfo.bmiHeader.biCompression = BI_RGB;
 
-
     int pitch = width * 4;
     BYTE* pixel_data = (BYTE*)malloc(pitch * height);
     BYTE* previous_pixel_data = (BYTE*)malloc(pitch * height);
@@ -153,15 +152,23 @@ int main() {
     memset(overflow_data, 0, pitch * height);
 
     // Demo data - password
-    unsigned char value = 0b1101011011010110;
+    unsigned short value = 0b1101011011010110;
 
     for (int i = 15; i >= 0; --i) {
+        DWORD startTime = GetTickCount();
+
+        printf("Starting update %d with go=%d at %lu ms\n", i, ((value >> i) & 1), startTime);
+
         if ((value >> i) & 1) {
             update_screen(hdc, hMemDC, hBitmap, pixel_data, previous_pixel_data, overflow_data, &bmpInfo, width, height, i, 1);
         }
         else {
             update_screen(hdc, hMemDC, hBitmap, pixel_data, previous_pixel_data, overflow_data, &bmpInfo, width, height, i, 0);
         }
+
+        DWORD endTime = GetTickCount();
+        printf("Finished update %d at %lu ms, duration: %lu ms\n\n", i, endTime, endTime - startTime);
+
         Sleep(500);
     }
 
