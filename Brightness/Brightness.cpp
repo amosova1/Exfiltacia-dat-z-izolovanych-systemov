@@ -18,8 +18,11 @@ void apply_filter(BYTE* pixel_data, BYTE* previous_pixel_data, int width, int he
     int pixelHeight = 200;
     int pixelWidth = 10;
 
-    for (int y = 100; y < pixelHeight; y++) {
-        for (int x = 0; x < pixelWidth; x++) {
+    int fromX = 100;
+    int fromY = 0;
+
+    for (int y = fromY; y < pixelHeight; y++) {
+        for (int x = fromX; x < pixelWidth; x++) {
             int pixel_offset = (y * pitch) + (x * 4); // BGRA format
             BYTE b = pixel_data[pixel_offset];
             BYTE g = pixel_data[pixel_offset + 1];
