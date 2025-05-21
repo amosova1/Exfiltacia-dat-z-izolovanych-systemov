@@ -1,133 +1,95 @@
+#define NOMINMAX // This must be before <windows.h>
 #include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <algorithm>
+
+bool filter_applied = false;
 
 void apply_filter(BYTE* pixel_data, BYTE* previous_pixel_data, int width, int height, int pitch, BYTE* overflow_data, int go) {
-    // Set changes in RGP value for pixels when value of data is 1
-    int addred = 4;
-    int addblue = 4;
-    int addgreen = 4;
+    // Changable constants
+    int addred = 3, addgreen = 3, addblue = 3;
+    int addred2 = -3,addgreen2 = -3, addblue2 = -3;
+    
+    int pixelHeight = height;
+    int pixelWidth = width;
 
-    // Set changes in RGP value for pixels when value of data is 0
-    int addred2 = -4;
-    int addblue2 = -4;
-    int addgreen2 = -4;
-
-    // Set height and width of pixels which will generate signals
-    int pixelHeight = 200;
-    int pixelWidth = 10;
-
-    int fromX = 100;
+    int fromX = 0;
     int fromY = 0;
 
-    for (int y = fromY; y < pixelHeight; y++) {
-        for (int x = fromX; x < pixelWidth; x++) {
-            int pixel_offset = (y * pitch) + (x * 4); // BGRA format
-            BYTE b = pixel_data[pixel_offset];
-            BYTE g = pixel_data[pixel_offset + 1];
-            BYTE r = pixel_data[pixel_offset + 2];
+    if (go == 1 && !filter_applied) {
+        filter_applied = true;
+        // Apply filter
+        for (int y = fromY; y < pixelHeight; y++) {
+            for (int x = fromX; x < pixelWidth; x++) {
+                int offset = y * pitch + x * 4;
 
-            if (go == 1) {
-                // Check if (r - 50) matches previous red value
-                if ((overflow_data[pixel_offset + 2] == 0 && previous_pixel_data[pixel_offset + 2] != (BYTE)max(0, r - addred))
-                    || (overflow_data[pixel_offset + 2] != 0 && previous_pixel_data[pixel_offset + 2] != (BYTE)max(0, r - (addred - overflow_data[pixel_offset + 2]))) ||
-                    (overflow_data[pixel_offset + 1] == 0 && previous_pixel_data[pixel_offset + 1] != (BYTE)max(0, g - addgreen))
-                    || (overflow_data[pixel_offset + 1] != 0 && previous_pixel_data[pixel_offset + 1] != (BYTE)max(0, g - (addgreen - overflow_data[pixel_offset + 1]))) ||
-                    (overflow_data[pixel_offset] == 0 && previous_pixel_data[pixel_offset] != (BYTE)max(0, b - addblue))
-                    || (overflow_data[pixel_offset] != 0 && previous_pixel_data[pixel_offset] != (BYTE)max(0, b - (addblue - overflow_data[pixel_offset])))) {
+                BYTE b = pixel_data[offset];
+                BYTE g = pixel_data[offset + 1];
+                BYTE r = pixel_data[offset + 2];
 
-                    // Save original values before applying filter
-                    previous_pixel_data[pixel_offset + 2] = r;
-                    previous_pixel_data[pixel_offset + 1] = g;
-                    previous_pixel_data[pixel_offset] = b;
-
-                    // Set filter
-                    BYTE new_r = (BYTE)min(255, r + addred);
-                    BYTE new_g = (BYTE)min(255, g + addgreen);
-                    BYTE new_b = (BYTE)min(255, b + addblue);
-
-                    // Check if it crosses 255
-                    if (new_r < r + addred) {
-                        overflow_data[pixel_offset + 2] = (r + addred) - 255;  // Store the overflow amount
-                    }
-                    else {
-                        overflow_data[pixel_offset + 2] = 0;  // No overflow
-                    }
-
-                    // Check if it crosses 255
-                    if (new_g < g + addgreen) {
-                        overflow_data[pixel_offset + 1] = (g + addgreen) - 255;  // Store the overflow amount
-                    }
-                    else {
-                        overflow_data[pixel_offset + 1] = 0;  // No overflow
-                    }
-
-                    // Check if it crosses 255
-                    if (new_b < b + addblue) {
-                        overflow_data[pixel_offset] = (b + addblue) - 255;  // Store the overflow amount
-                    }
-                    else {
-                        overflow_data[pixel_offset] = 0;  // No overflow
-                    }
-
-                    // Apply filter
-                    r = new_r;
-                    b = new_b;
-                    g = new_g;
-                }
-
-                // Update pixel data
-                pixel_data[pixel_offset] = b;
-                pixel_data[pixel_offset + 1] = g;
-                pixel_data[pixel_offset + 2] = r;
-            }
-            else {
-                // Save original values before applying filter
-                previous_pixel_data[pixel_offset + 2] = r;
-                previous_pixel_data[pixel_offset + 1] = g;
-                previous_pixel_data[pixel_offset] = b;
-
-                // Set filter
-                BYTE new_r = (BYTE)min(255, r + addred2);
-                BYTE new_g = (BYTE)min(255, g + addgreen2);
-                BYTE new_b = (BYTE)min(255, b + addblue2);
-
-                // Check if it crosses 255
-                if (new_r < r + addred2) {
-                    overflow_data[pixel_offset + 2] = (r + addred2) - 255;  // Store the overflow amount
-                }
-                else {
-                    overflow_data[pixel_offset + 2] = 0;  // No overflow
-                }
-
-                // Check if it crosses 255
-                if (new_g < g + addgreen2) {
-                    overflow_data[pixel_offset + 1] = (g + addgreen2) - 255;  // Store the overflow amount
-                }
-                else {
-                    overflow_data[pixel_offset + 1] = 0;  // No overflow
-                }
-
-                // Check if it crosses 255
-                if (new_b < b + addblue2) {
-                    overflow_data[pixel_offset] = (b + addblue2) - 255;  // Store the overflow amount
-                }
-                else {
-                    overflow_data[pixel_offset] = 0;  // No overflow
-                }
+                // Store previous values
+                previous_pixel_data[offset + 2] = r;
+                previous_pixel_data[offset + 1] = g;
+                previous_pixel_data[offset] = b;
 
                 // Apply filter
-                r = new_r;
-                b = new_b;
-                g = new_g;
+                int temp_r = r + addred;
+                int temp_g = g + addgreen;
+                int temp_b = b + addblue;
 
-                // Update pixel data
-                pixel_data[pixel_offset] = b;
-                pixel_data[pixel_offset + 1] = g;
-                pixel_data[pixel_offset + 2] = r;
+                // Calculate overflow or underflow
+                overflow_data[offset + 2] = (temp_r > 255) ? (temp_r - 255) : ((temp_r < 0) ? -temp_r : 0);
+                overflow_data[offset + 1] = (temp_g > 255) ? (temp_g - 255) : ((temp_g < 0) ? -temp_g : 0);
+                overflow_data[offset] = (temp_b > 255) ? (temp_b - 255) : ((temp_b < 0) ? -temp_b : 0);
+
+                // Clamp to [0, 255]
+                pixel_data[offset + 2] = (BYTE)std::max(0, std::min(255, temp_r));
+                pixel_data[offset + 1] = (BYTE)std::max(0, std::min(255, temp_g));
+                pixel_data[offset] = (BYTE)std::max(0, std::min(255, temp_b));
             }
         }
+    }
+    else if (go == 0 && filter_applied) {
+        filter_applied = false;
+        // go == 0: revert filter using overflow
+        for (int y = fromY; y < pixelHeight; y++) {
+            for (int x = fromX; x < pixelWidth; x++) {
+                int offset = y * pitch + x * 4;
+
+                BYTE b = pixel_data[offset];
+                BYTE g = pixel_data[offset + 1];
+                BYTE r = pixel_data[offset + 2];
+
+                // Revert filter
+                int temp_r = r + addred2;
+                int temp_g = g + addgreen2;
+                int temp_b = b + addblue2;
+
+                temp_r = std::max(0, std::min(255, temp_r + overflow_data[offset + 2]));
+                temp_g = std::max(0, std::min(255, temp_g + overflow_data[offset + 1]));
+                temp_b = std::max(0, std::min(255, temp_b + overflow_data[offset]));
+
+                // Save to pixel data
+                pixel_data[offset + 2] = (BYTE)temp_r;
+                pixel_data[offset + 1] = (BYTE)temp_g;
+                pixel_data[offset] = (BYTE)temp_b;
+
+                // Store current as previous
+                previous_pixel_data[offset + 2] = (BYTE)temp_r;
+                previous_pixel_data[offset + 1] = (BYTE)temp_g;
+                previous_pixel_data[offset] = (BYTE)temp_b;
+
+                // Clear overflow
+                overflow_data[offset + 2] = 0;
+                overflow_data[offset + 1] = 0;
+                overflow_data[offset] = 0;
+            }
+        }
+    }
+    else {
+        return;
     }
 }
 
@@ -191,17 +153,16 @@ int main() {
     memset(overflow_data, 0, pitch * height);
 
     // Demo data - password
-    unsigned char value = 0b11010110;
+    unsigned char value = 0b1101011011010110;
 
-    for (int i = 7; i >= 0; --i) {
+    for (int i = 15; i >= 0; --i) {
         if ((value >> i) & 1) {
             update_screen(hdc, hMemDC, hBitmap, pixel_data, previous_pixel_data, overflow_data, &bmpInfo, width, height, i, 1);
-            Sleep(1000);
         }
         else {
             update_screen(hdc, hMemDC, hBitmap, pixel_data, previous_pixel_data, overflow_data, &bmpInfo, width, height, i, 0);
-            Sleep(1000);
         }
+        Sleep(500);
     }
 
     free(pixel_data);
