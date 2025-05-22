@@ -1,0 +1,67 @@
+def extract_time(line):
+    try:
+        return float(line.split(",")[0])
+    except ValueError:
+        return None
+
+def parse_rgb(line):
+    try:
+        start = line.index('[') + 1
+        end = line.index(']')
+        rgb_str = line[start:end]
+        rgb_values = list(map(int, rgb_str.split()))
+        return rgb_values
+    except ValueError:
+        return None
+
+
+def check_changes_over_threshold(data, threshold=2, repeat_window=670):
+    last_direction = None
+    last_change_time = -float('inf')
+    last_values = None
+
+    for i in range(1, len(data)):
+        (t_prev, prev), (t_curr, curr) = data[i - 1], data[i]
+        diffs = [c - p for p, c in zip(prev, curr)]
+
+        # Zistíme ktoré zložky majú zmenu väčšiu alebo rovnakú ako threshold
+        significant = [d for d in diffs if abs(d) >= threshold]
+        significant2 = [d for d in diffs if abs(d) >= threshold+1]
+
+
+        if len(significant) >= 3 or len(significant2) >= 2:
+            # Nová detekovaná zmena
+            if (t_curr - last_change_time) > repeat_window and last_direction is not None:
+                print("Repeat Direction flags:", last_direction)
+            
+            direction = [1 if d > threshold else (0 if d < -threshold else '1') for d in diffs]
+            print(f"{t_prev:.2f} ms: {prev}")
+            print(f"{t_curr:.2f} ms: {curr}")
+            print("Direction flags:", direction)
+            last_direction = direction
+            last_change_time = t_curr
+            last_values = curr
+
+
+
+def main():
+    filename = "pixel_values.txt"
+
+    with open(filename, "r") as f:
+        lines = f.readlines()
+
+    rgb_data = []
+    for line in lines:
+        time_val = extract_time(line)
+        if time_val is None or not str(time_val) or time_val <= 2845.0:
+            continue
+
+        rgb = parse_rgb(line)
+        if rgb:
+            rgb_data.append((time_val, rgb))
+
+    check_changes_over_threshold(rgb_data)
+
+
+if __name__ == "__main__":
+    main()
