@@ -1,0 +1,51 @@
+Čas exfiltrovanie pre jednotlivý bitu (go).
+
+V prípade kedy hodnota bitu mení pri vysielaní trvá úprava hodnôt od 109 ms do 157 ms. Ak sa hodnota bitu pri vysielaní nemení, čas vysielania je od 16 ms do 47 ms.
+
+Starting update 15 with go=1 at 50813281 ms
+Finished update 15 at 50813406 ms, duration: 125 ms
+
+Starting update 14 with go=1 at 50813906 ms
+Finished update 14 at 50813953 ms, duration: 47 ms
+
+Starting update 13 with go=0 at 50814468 ms
+Finished update 13 at 50814593 ms, duration: 125 ms
+
+Starting update 12 with go=1 at 50815093 ms
+Finished update 12 at 50815218 ms, duration: 125 ms
+
+Starting update 11 with go=0 at 50815734 ms
+Finished update 11 at 50815859 ms, duration: 125 ms
+
+Starting update 10 with go=1 at 50816375 ms
+Finished update 10 at 50816484 ms, duration: 109 ms
+
+Starting update 9 with go=1 at 50816984 ms
+Finished update 9 at 50817031 ms, duration: 47 ms
+
+Starting update 8 with go=0 at 50817546 ms
+Finished update 8 at 50817656 ms, duration: 110 ms
+
+Starting update 7 with go=1 at 50818156 ms
+Finished update 7 at 50818265 ms, duration: 109 ms
+
+Starting update 6 with go=1 at 50818765 ms
+Finished update 6 at 50818796 ms, duration: 31 ms
+
+Starting update 5 with go=0 at 50819296 ms
+Finished update 5 at 50819406 ms, duration: 110 ms
+
+Starting update 4 with go=1 at 50819906 ms
+Finished update 4 at 50820031 ms, duration: 125 ms
+
+Starting update 3 with go=0 at 50820546 ms
+Finished update 3 at 50820656 ms, duration: 110 ms
+
+Starting update 2 with go=1 at 50821171 ms
+Finished update 2 at 50821328 ms, duration: 157 ms
+
+Starting update 1 with go=1 at 50821843 ms
+Finished update 1 at 50821859 ms, duration: 16 ms
+
+Starting update 0 with go=0 at 50822375 ms
+Finished update 0 at 50822500 ms, duration: 125 ms
