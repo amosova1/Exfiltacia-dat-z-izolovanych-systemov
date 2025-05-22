@@ -13,3 +13,7 @@ pixelHeight, pixelWidth - šírka a výška pixelov, ktoré budú exfiltrovať d
 fromX, fromY - posícia od ktorej bude pixelHeight a pixelWidth počítaná 
 
 V súboroch stačí pre úspešné spustenie definovať názov súboru na úpravu a názov výsledného súboru.
+
+Súbor exfiltratedData obsahuje videá zachycujúce exfiltráciu pričom, pre ich veľkosť boli kompesované cez:
+ffmpeg -i video.mp4 -vf scale=1280:-2 -vcodec libx264 -crf 30 -preset slow -acodec aac -b:a 96k video2.mp4
+
