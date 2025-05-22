@@ -34,7 +34,7 @@ def check_changes_over_threshold(data, threshold=2, repeat_window=670):
             if (t_curr - last_change_time) > repeat_window and last_direction is not None:
                 print("Repeat Direction flags:", last_direction)
             
-            direction = [1 if d > threshold else (0 if d < -threshold else '1') for d in diffs]
+            direction = [1 if d > 0 else (0 if d < 0 else '-') for d in diffs]
             print(f"{t_prev:.2f} ms: {prev}")
             print(f"{t_curr:.2f} ms: {curr}")
             print("Direction flags:", direction)
