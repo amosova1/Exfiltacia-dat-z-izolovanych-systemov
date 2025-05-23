@@ -1,6 +1,6 @@
-Implementácia útoku Fansmitter
+# Implementácia útoku Fansmitter
 
-Pri implementácii sme vytovrili dve modifikácie za použitia počítača s tromi ventilátormi a jednu verziu pri použití ventilátora (Nidec) v kontrolovanom prodtredí. Výsledky testovaní sú v príslušných priečinkoch, pričom sú pomenované nasledovne:
+Pri implementácii sme vytvorili dve verzie za použitia počítača s tromi ventilátormi a jednu verziu pri použití ventilátora (Nidec) v kontrolovanom prostredí. Výsledky testovaní sú v príslušných priečinkoch, pričom sú pomenované nasledovne:
 
 xyz-a-b
 
