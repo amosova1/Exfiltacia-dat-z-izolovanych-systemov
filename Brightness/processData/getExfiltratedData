@@ -14,7 +14,9 @@ def parse_rgb(line):
     except ValueError:
         return None
 
-
+# Funkcia extrahujúca exfiltrované dáta - hodnoty threshold a repeat_window je možné prepísať
+# threshold je nastavený na hodnotu 2 pre použitie danej konštanty pri prenose dát
+# repeat_window má časovu hodnotu vyjadrujúcu nemenenie ne/použitia filtra pri vysielaní opakovanej hodnoty bitu  
 def check_changes_over_threshold(data, threshold=2, repeat_window=670):
     last_direction = None
     last_change_time = -float('inf')
@@ -24,20 +26,23 @@ def check_changes_over_threshold(data, threshold=2, repeat_window=670):
         (t_prev, prev), (t_curr, curr) = data[i - 1], data[i]
         diffs = [c - p for p, c in zip(prev, curr)]
 
-        # Zistíme ktoré zložky majú zmenu väčšiu alebo rovnakú ako threshold
+        # Odhalenie zmeny použitia filtra s odchýlkou, kvôli použitiu stabilizácie a odstránenia šumu 
         significant = [d for d in diffs if abs(d) >= threshold]
         significant2 = [d for d in diffs if abs(d) >= threshold+1]
 
-
         if len(significant) >= 3 or len(significant2) >= 2:
-            # Nová detekovaná zmena
+            # Nedetekovaný exfiltrovaný bit (hodnota exfiltrovaného bitu je rovnaká ako predchádzajúca)
             if (t_curr - last_change_time) > repeat_window and last_direction is not None:
                 print("Repeat Direction flags:", last_direction)
             
             direction = [1 if d > 0 else (0 if d < 0 else '-') for d in diffs]
+
+            # Výsledné dáta (čas snímku, smer zmeny každej RGB hodnoty pixelu (+/- = 1/0))
             print(f"{t_prev:.2f} ms: {prev}")
             print(f"{t_curr:.2f} ms: {curr}")
             print("Direction flags:", direction)
+
+            # Posledná detekovaná zmena zapnutia alebo vypnutia filtra 
             last_direction = direction
             last_change_time = t_curr
             last_values = curr
@@ -45,6 +50,7 @@ def check_changes_over_threshold(data, threshold=2, repeat_window=670):
 
 
 def main():
+    # Modifikovateľné dáta
     filename = "pixel_values.txt"
 
     with open(filename, "r") as f:
@@ -53,6 +59,8 @@ def main():
     rgb_data = []
     for line in lines:
         time_val = extract_time(line)
+
+        # Hodnota 2845.0 vyjadruje čas začiatku exfiltrácie vo videu
         if time_val is None or not str(time_val) or time_val <= 2845.0:
             continue
 
