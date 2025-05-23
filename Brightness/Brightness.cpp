@@ -8,7 +8,7 @@
 bool filter_applied = false;
 
 void apply_filter(BYTE* pixel_data, BYTE* previous_pixel_data, int width, int height, int pitch, BYTE* overflow_data, int go) {
-    // Modifiable data
+    // Modifikovateľné dáta
     int addred = 2, addgreen = 2, addblue = 2;
     int addred2 = -2,addgreen2 = -2, addblue2 = -2;
 
@@ -17,6 +17,7 @@ void apply_filter(BYTE* pixel_data, BYTE* previous_pixel_data, int width, int he
 
     int fromX = 0;
     int fromY = 0;
+    //
 
     if (go == 1 && !filter_applied) {
         filter_applied = true;
@@ -29,31 +30,31 @@ void apply_filter(BYTE* pixel_data, BYTE* previous_pixel_data, int width, int he
                 BYTE g = pixel_data[offset + 1];
                 BYTE r = pixel_data[offset + 2];
 
-                // Store previous values
+                // Uloženie predchádzajúcej hodnoty pixelov
                 previous_pixel_data[offset + 2] = r;
                 previous_pixel_data[offset + 1] = g;
                 previous_pixel_data[offset] = b;
 
-                // Apply filter
+                // Aplikovanie filtra
                 int temp_r = r + addred;
                 int temp_g = g + addgreen;
                 int temp_b = b + addblue;
 
-                // Calculate overflow or underflow
+                // Vypočítanie pretečenia alebo podtečenia hodnoty pixelu po aplikovaní filtra
                 overflow_data[offset + 2] = (temp_r > 255) ? (temp_r - 255) : ((temp_r < 0) ? -temp_r : 0);
                 overflow_data[offset + 1] = (temp_g > 255) ? (temp_g - 255) : ((temp_g < 0) ? -temp_g : 0);
                 overflow_data[offset] = (temp_b > 255) ? (temp_b - 255) : ((temp_b < 0) ? -temp_b : 0);
 
-                // Clamp to [0, 255]
+                // Zabezpečenie ohraničenia hodnoty RGB hodnoty pixelu na 0 až 255
                 pixel_data[offset + 2] = (BYTE)std::max(0, std::min(255, temp_r));
                 pixel_data[offset + 1] = (BYTE)std::max(0, std::min(255, temp_g));
                 pixel_data[offset] = (BYTE)std::max(0, std::min(255, temp_b));
             }
         }
     }
-    else if (go == 0 && filter_applied) {
+    else if (go == 0 && filter_applied) { // vysielaná hodnota bitu je 0 pričom bol aplikovaný filter - je potrebné vrátiť hodnoty do pôvodného stavu
         filter_applied = false;
-        // go == 0: revert filter using overflow
+        
         for (int y = fromY; y < pixelHeight; y++) {
             for (int x = fromX; x < pixelWidth; x++) {
                 int offset = y * pitch + x * 4;
@@ -62,26 +63,27 @@ void apply_filter(BYTE* pixel_data, BYTE* previous_pixel_data, int width, int he
                 BYTE g = pixel_data[offset + 1];
                 BYTE r = pixel_data[offset + 2];
 
-                // Revert filter
+                //  Navrátenie pôvodnej hodnoty pixelov
                 int temp_r = r + addred2;
                 int temp_g = g + addgreen2;
                 int temp_b = b + addblue2;
 
+                // Vypočítanie pretečenia alebo podtečenia hodnoty pixelu po aplikovaní filtra
                 temp_r = std::max(0, std::min(255, temp_r + overflow_data[offset + 2]));
                 temp_g = std::max(0, std::min(255, temp_g + overflow_data[offset + 1]));
                 temp_b = std::max(0, std::min(255, temp_b + overflow_data[offset]));
 
-                // Save to pixel data
+                // Uloženie nový hodnôt pixelov
                 pixel_data[offset + 2] = (BYTE)temp_r;
                 pixel_data[offset + 1] = (BYTE)temp_g;
                 pixel_data[offset] = (BYTE)temp_b;
 
-                // Store current values as previous
+                // Uloženie dát ako predchádzajúce
                 previous_pixel_data[offset + 2] = (BYTE)temp_r;
                 previous_pixel_data[offset + 1] = (BYTE)temp_g;
                 previous_pixel_data[offset] = (BYTE)temp_b;
 
-                // Clear overflow
+                // Vynulovanie hodnôt pretečenia / podtečenia
                 overflow_data[offset + 2] = 0;
                 overflow_data[offset + 1] = 0;
                 overflow_data[offset] = 0;
@@ -95,14 +97,14 @@ void apply_filter(BYTE* pixel_data, BYTE* previous_pixel_data, int width, int he
 
 
 void update_screen(HDC hdc, HDC hMemDC, HBITMAP hBitmap, BYTE* pixel_data, BYTE* previous_pixel_data, BYTE* overflow_data, BITMAPINFO* bmpInfo, int width, int height, int iteration, int go) {
-    // Capture the current screen
+    // Zachytenie aktuálneho obrazu
     BitBlt(hMemDC, 0, 0, width, height, hdc, 0, 0, SRCCOPY);
     GetDIBits(hMemDC, hBitmap, 0, height, pixel_data, bmpInfo, DIB_RGB_COLORS);
 
-    // Apply red filter conditionally
+    // Aplikovanie filtra
     apply_filter(pixel_data, previous_pixel_data, width, height, width * 4, overflow_data, go);
 
-    // Apply modified bitmap to the screen
+    // Nastavenie nových hodnôt pixelov na obraz
     SetDIBits(hMemDC, hBitmap, 0, height, pixel_data, bmpInfo, DIB_RGB_COLORS);
     BitBlt(hdc, 0, 0, width, height, hMemDC, 0, 0, SRCCOPY);
 }
@@ -151,7 +153,7 @@ int main() {
     memset(previous_pixel_data, 0, pitch * height);
     memset(overflow_data, 0, pitch * height);
 
-    // Demo data - password
+    // Demo data - heslo
     unsigned short value = 0b1101011011010110;
 
     for (int i = 15; i >= 0; --i) {
