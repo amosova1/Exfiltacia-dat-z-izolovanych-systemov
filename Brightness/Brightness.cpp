@@ -8,6 +8,7 @@
 bool filter_applied = false;
 
 void apply_filter(BYTE* pixel_data, BYTE* previous_pixel_data, int width, int height, int pitch, BYTE* overflow_data, int go) {
+    // Modifiable data
     int addred = 2, addgreen = 2, addblue = 2;
     int addred2 = -2,addgreen2 = -2, addblue2 = -2;
 
@@ -19,7 +20,6 @@ void apply_filter(BYTE* pixel_data, BYTE* previous_pixel_data, int width, int he
 
     if (go == 1 && !filter_applied) {
         filter_applied = true;
-        // Apply filter
 
         for (int y = fromY; y < pixelHeight; y++) {
             for (int x = fromX; x < pixelWidth; x++) {
@@ -76,7 +76,7 @@ void apply_filter(BYTE* pixel_data, BYTE* previous_pixel_data, int width, int he
                 pixel_data[offset + 1] = (BYTE)temp_g;
                 pixel_data[offset] = (BYTE)temp_b;
 
-                // Store current as previous
+                // Store current values as previous
                 previous_pixel_data[offset + 2] = (BYTE)temp_r;
                 previous_pixel_data[offset + 1] = (BYTE)temp_g;
                 previous_pixel_data[offset] = (BYTE)temp_b;
