@@ -1,40 +1,39 @@
 import cv2
 import numpy as np
 
-# Load the video
-cap = cv2.VideoCapture('stabilized_videoF.mp4')
+# Modifikovateľné dáta
+preparedVideoName = 'stabilized_videoF.mp4'
+finalVideoName = 'noise_videoF.mp4'
 
-# Get video properties
+
+# Načítanie pripraveného videa videa
+cap = cv2.VideoCapture(preparedVideoName)
+
+# Načítanie vlastností videa
 frame_width = int(cap.get(3))
 frame_height = int(cap.get(4))
 fps = int(cap.get(cv2.CAP_PROP_FPS))
 
-# Define codec and create VideoWriter object
-out = cv2.VideoWriter('noise_videoF.mp4', cv2.VideoWriter_fourcc(*'mp4v'), fps, (frame_width, frame_height))
+out = cv2.VideoWriter(finalVideoName, cv2.VideoWriter_fourcc(*'mp4v'), fps, (frame_width, frame_height))
 
 while cap.isOpened():
     ret, frame = cap.read()
     if not ret:
-        break  # Break loop if no frame is captured
+        # Ukončenie cyklu po skončení videa
+        break 
 
-    # Apply Bilateral Filter (removes noise while keeping edges sharp)
+    # Aplikovanie bilaterálneho filtra (odstránenie vizuálneho šumu so zachovaním ostrosti)
     bilateral = cv2.bilateralFilter(frame, d=9, sigmaColor=75, sigmaSpace=75)
 
-    # Apply Non-Local Means Denoising (higher h values to remove pixel noise)
+    # Aplikovanie nelokálneho priemerného šumu (vyššia hodnota h určuje intenzitu redukcie šumu)
     denoised = cv2.fastNlMeansDenoisingColored(bilateral, None, 3, 3, 7, 21)
 
-    # Apply Median Blur (removes tiny dots/pixels)
+    # Aplikovanie mediánového rozmazania (odstráni nekonzistentné pixely / "bodky")
     final_output = cv2.medianBlur(denoised, 1)
 
-    # Write the frame to the output video
+    # Zápis upraveného snímku
     out.write(final_output)
 
-    # Display the frame (optional)
-    # cv2.imshow('Denoised Video', final_output)
-    # if cv2.waitKey(1) & 0xFF == ord('q'):
-      #  break
-
-# Release resources
 cap.release()
 out.release()
 cv2.destroyAllWindows()
