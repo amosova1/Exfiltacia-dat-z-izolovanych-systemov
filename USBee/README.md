@@ -2,10 +2,10 @@ Implementácia útoku USBee
 
 V tomto priečinku sa nachádzajú:
 - výsledky implementácie (obr. usbee-init, usbee-bezKabla, usbee-sKabom)
-- obrázok použitého pásmovej zádrže a zosilovača
-- zdrojový kód, ktorý generuje podľa vstupu súbor: určitého názvu, veľkosti, a frekvencie, na ktorej bude možné zachytit signál pri prenose súboru na USB kľúč.
+- obrázok použitéj pásmovéj zádrže a zosilovača
+- zdrojový kód, ktorý generuje podľa vstupu súbor pripravený na exfiltrovanie. Vstup do funkcie je názvu výsledného súboru, veľkosti, a frekvencia, na ktorej bude možné zachytiť signál pri prenose súboru na USB kľúč.
 
-Tento zdrojový kód obsahuje funkciu, ktorá je zavolaná:
+Tento zdrojový kód obsahuje funkciu, ktorá je volaná nasledovne:
 
 fill_buffer_freq("output.bin", 1, 4600)
 
